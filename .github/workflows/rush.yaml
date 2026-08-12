@@ -138,6 +138,7 @@ jobs:
             -p "8180:30080@agent:0:direct"
             -p "9092:30092@agent:0:direct"
             -p "27017:30017@agent:0:direct"
+            -p "6379:30063@agent:0:direct"
             --agents 1
             --no-lb
             --k3s-arg "--disable=traefik,servicelb,metrics-server@server:*"
