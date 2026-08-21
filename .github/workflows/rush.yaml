@@ -38,6 +38,7 @@ jobs:
       chromatic: ${{ steps.config.outputs.chromatic }}
       integration: ${{ steps.config.outputs.integration }}
       playwright: ${{ steps.config.outputs.playwright }}
+      ci-diagnostics: ${{ steps.config.outputs.ci-diagnostics }}
     steps:
       - uses: actions/checkout@v6
       - &node
@@ -80,6 +81,11 @@ jobs:
             echo "integration=true" >> $GITHUB_OUTPUT
           else
             echo "integration=" >> $GITHUB_OUTPUT
+          fi
+          if [ -f ./test/integration/ci-diagnostics.sh ]; then
+            echo "ci-diagnostics=true" >> $GITHUB_OUTPUT
+          else
+            echo "ci-diagnostics=" >> $GITHUB_OUTPUT
           fi
           echo "playwright=$(find . -path '*/node_modules/.bin/playwright' -print -quit 2>/dev/null)" >> $GITHUB_OUTPUT
   tests:
@@ -152,6 +158,16 @@ jobs:
           PLAYWRIGHT_SKIP_INSTALL: '1'
         name: Run Tests
         if: ${{ !cancelled() }}
+      - name: Collect CI failure diagnostics (k8s + MySQL)
+        if: ${{ failure() && needs.setup.outputs.ci-diagnostics == 'true' }}
+        run: bash test/integration/ci-diagnostics.sh
+      - name: Upload CI failure diagnostics
+        if: ${{ failure() && needs.setup.outputs.ci-diagnostics == 'true' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: ci-diagnostics
+          path: ci-debug/
+          if-no-files-found: ignore
       - run: node common/scripts/install-run-rush.js ci-coverage # --verbose --to git:origin/${{ github.event.pull_request.base.ref }}
         env:
           BLONG_MASTER_KEY: ${{ secrets.BLONG_MASTER_KEY }}
