@@ -133,6 +133,9 @@ jobs:
           else
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
+      - name: Install dependencies for license scan
+        if: ${{ steps.check-package.outputs.exists == 'true' && inputs.license-scan }}
+        run: npm ci
 
       - name: Install Syft
         if: ${{ steps.check-package.outputs.exists == 'true' && inputs.license-scan }}
