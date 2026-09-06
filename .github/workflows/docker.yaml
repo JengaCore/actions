@@ -24,6 +24,10 @@ on:
         required: false
         type: string
         default: ${{ github.repository_owner }}
+      username:
+        required: false
+        type: string
+        default: ${{ github.actor }}
       downstream: # e.g. https://api.github.com/repos/infitx-org/profile-cd/actions/workflows/docker-image.yaml/dispatches
         required: false
         type: string
@@ -71,7 +75,7 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ${{ inputs.registry }}
-          username: ${{ github.actor }}
+          username: ${{ inputs.username }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
       - name: Build Docker image
